@@ -59,7 +59,7 @@ select{flex:1}.cp{min-height:26px;font-size:20px;letter-spacing:1px;color:var(--
 <div class="row"><select id="lvl"><option value="1">Easy</option><option value="2">Medium</option><option value="3" selected>Hard</option><option value="4">Master (slow)</option></select><select id="spd"><option value="300">AI: Fast</option><option value="1200" selected>AI: Normal</option><option value="2600">AI: Slow</option></select></div>
 <div class="row"><select id="bt"></select><select id="pt"></select></div>
 <div class="row"><button class="p" id="new">New</button><button id="undo">Undo</button><button id="hintb">Hint</button><button id="flip">Flip</button></div>
-<div class="row" id="onl" style="display:none"><button id="mk">Play online</button><input id="cd" placeholder="Game code" maxlength="6"><button id="jn">Join</button></div>
+<div class="row" id="onl"><button id="mk">Play online</button><input id="cd" placeholder="Game code" maxlength="6"><button id="jn">Join</button></div>
 <div id="net"></div>
 </div></div>
 <div id="promo"><div id="pc"></div></div>
@@ -135,7 +135,7 @@ function newGame(online){const st='rnbqkbnr'+'pppppppp'+' '.repeat(32)+'PPPPPPPP
 function doMove(m,rm){const L=legal(S),sn=san(m,L),u=make(S,m),w=S.t==='w';
  const nl=legal(S);let suf='';if(inCheck(S,w))suf=nl.length?'+':'#';
  hist.push({m,u,s:sn+suf});snaps.push(S.b.slice());sel=null;targets=[];hint=null;render();aiMove();
- if(mode==='on'&&!rm&&gref)gref.update({moves:hist.map(h=>enc(h.m))}).catch(()=>{$('net').textContent='Move not saved - check connection'})}
+ if(mode==='on'&&!rm&&ws&&ws.readyState===1)ws.send(JSON.stringify({t:'move',mv:enc(m)}))}
 function aiMove(){if(over||mode!=='ai'||S.t===human)return;thinking=true;$('st').textContent='Thinking…';const t=++token;
  const t0=Date.now(),wait=+$('spd').value;
  setTimeout(()=>{if(t!==token)return;const m=best(S,+$('lvl').value);const rest=Math.max(0,wait*(.8+Math.random()*.5)-(Date.now()-t0));setTimeout(()=>{if(t!==token)return;thinking=false;if(m)doMove(m)},rest)},60)}
@@ -178,30 +178,34 @@ $('undo').onclick=()=>{if(!hist.length||mode==='on')return;token++;thinking=fals
  sel=null;targets=[];hint=null;render();aiMove()};
 $('hintb').onclick=()=>{if(over||thinking||mode==='on')return;thinking=true;$('st').textContent='Thinking…';
  setTimeout(()=>{const m=best(S,3);thinking=false;hint=m;sel=null;targets=[];render()},40)};
+const SERVER='wss://chess-db.onrender.com';
 const tok=(()=>{try{let k=localStorage.getItem('cht');if(!k){k=Math.random().toString(36).slice(2,10);localStorage.setItem('cht',k)}return k}catch(e){return Math.random().toString(36).slice(2,10)}})();
-let db=null,gref=null,unsub=null,gcode='',viewSet=0;
+let ws=null,gcode='',viewSet=0;
 const enc=m=>m.f+'-'+m.t+(m.p?'-'+m.p:'');
-if(window.claude&&claude.use)claude.use('db').then(d=>{if(d){db=d;$('onl').style.display='flex'}}).catch(()=>{});
-function leaveNet(){if(unsub){unsub();unsub=null}gref=null;gcode='';$('net').textContent=''}
+function leaveNet(){if(ws){ws.onclose=null;ws.close();ws=null}gcode='';$('net').textContent=''}
 function sync(ms){const mine=hist.map(h=>enc(h.m));let i=0;
  while(i<mine.length&&i<ms.length&&mine[i]===ms[i])i++;
  if(i<mine.length&&i<ms.length){newGame(true);i=0}
  for(;i<ms.length;i++){const[f,t,p]=ms[i].split('-'),m=legal(S).find(x=>x.f==f&&x.t==t&&(x.p||'')===(p||''));if(!m)break;doMove(m,1)}}
-async function goOnline(code,create){
- try{leaveNet();const ref=db.doc('games/'+code);
-  if(create)await ref.set({moves:[],white:tok,black:null});
-  else{const s=await ref.get();if(!s.exists){$('net').textContent='No game with that code';return}
-   const d=s.data();if(d.white!==tok&&d.black!==tok&&!d.black)await ref.update({black:tok})}
-  gref=ref;gcode=code;mode='on';human='x';viewSet=0;newGame(true);
-  unsub=ref.onSnapshot(s=>{const d=s.data();if(!d)return;
-   human=d.white===tok?'w':d.black===tok?'b':'x';if(!viewSet){view=human==='b'?'b':'w';viewSet=1}
-   const role=human==='w'?'White':human==='b'?'Black':'Spectating';
-   $('net').textContent='Online: you are '+role+' | code '+gcode+(d.black?'':' | waiting for opponent (tap to copy code)');
-   sync(d.moves||[]);render()},()=>{$('net').textContent='Connection lost'})
- }catch(e){$('net').textContent='Could not connect ('+(e.code||'error')+'). Your friend needs Contributor access to this page.'}}
-$('mk').onclick=()=>goOnline(Math.random().toString(36).slice(2,8).toUpperCase(),1);
+function goOnline(code,create){
+ if(SERVER.includes('YOUR-SERVER')){$('net').textContent='Set the SERVER url in chess.html first (see README)';return}
+ leaveNet();$('net').textContent='Connecting... (free servers can take up to a minute to wake)';
+ let w;try{w=new WebSocket(SERVER)}catch(e){$('net').textContent='Bad server URL';return}
+ ws=w;
+ w.onopen=()=>w.send(JSON.stringify({t:create?'create':'join',code,tok}));
+ w.onmessage=e=>{let d;try{d=JSON.parse(e.data)}catch(x){return}
+  if(d.t==='err'){$('net').textContent=d.m;return}
+  if(d.t!=='state')return;
+  if(mode!=='on'||gcode!==d.code){gcode=d.code;mode='on';viewSet=0;newGame(true)}
+  human=d.role;if(!viewSet){view=human==='b'?'b':'w';viewSet=1}
+  const role=human==='w'?'White':human==='b'?'Black':'Spectating';
+  $('net').textContent='Online: you are '+role+' | code '+gcode+(d.opp?'':' | waiting for opponent - tap to copy invite link');
+  sync(d.moves||[]);render()};
+ w.onclose=()=>{if(ws===w){const c=gcode;$('net').textContent='Disconnected - reconnecting...';setTimeout(()=>{if(ws===w&&c)goOnline(c,0)},2000)}};
+ w.onerror=()=>{if(!gcode)$('net').textContent='Cannot reach the server'}}
+$('mk').onclick=()=>goOnline('',1);
 $('jn').onclick=()=>{const c=$('cd').value.trim().toUpperCase();if(c.length>=4)goOnline(c,0)};
-$('net').onclick=()=>{if(gcode)try{navigator.clipboard.writeText(gcode)}catch(e){}};
+$('net').onclick=()=>{if(gcode)try{navigator.clipboard.writeText(location.href.split('?')[0]+'?g='+gcode)}catch(e){}};
 const go=n=>{n=Math.max(0,Math.min(hist.length,n));rv=n===hist.length?null:n;sel=null;targets=[];render()},cur=()=>rv===null?hist.length:rv;
 $('f0').onclick=()=>go(0);$('f1').onclick=()=>go(cur()-1);$('f2').onclick=()=>go(cur()+1);$('f3').onclick=()=>go(hist.length);
 $('mv').onclick=e=>{const s=e.target.closest('[data-ply]');if(s)go(+s.dataset.ply)};
@@ -213,4 +217,5 @@ function theme(){const[l,d]=BT[$('bt').value],p=PT[$('pt').value],s=document.doc
  ['pwf','pws','pbf','pbs','pwd','pbd'].forEach((k,i)=>s.setProperty('--'+k,p[i]))}
 $('bt').onchange=$('pt').onchange=theme;theme();
 newGame();
+{const q=new URLSearchParams(location.search).get('g');if(q)goOnline(q.toUpperCase(),0)}
 </script></body></html>
