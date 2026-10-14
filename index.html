@@ -33,7 +33,7 @@ button:hover{border-color:var(--acc)}button.p{background:var(--acc);color:#fff;b
 select{flex:1}.cp{min-height:26px;font-size:20px;letter-spacing:1px;color:var(--text);display:flex;justify-content:space-between}
 .cp small{font-size:12px;color:var(--muted);align-self:center}.rt{display:flex;gap:8px;align-items:center}.ck{font:600 15px ui-monospace,Menlo,Consolas,monospace;padding:2px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line);min-width:58px;text-align:center}.ck:empty{display:none}.ck.on{background:var(--acc);color:#fff;border-color:var(--acc)}.ck.low{background:#c0392b;color:#fff;border-color:#c0392b}
 #mv{flex:1;min-height:90px;position:relative;overflow-y:auto;border:1px solid var(--line);border-radius:7px;padding:6px 8px;display:grid;grid-template-columns:28px 1fr 1fr;gap:2px 4px;align-content:start;font-variant-numeric:tabular-nums;font-size:14px}#mv .m{cursor:pointer;padding:1px 5px;border-radius:4px}#mv .m:hover{background:var(--line)}#mv .cur{background:var(--acc);color:#fff}.nav button{flex:1;font-size:16px;padding:4px}
-#mv .n{color:var(--muted)}#rs,#dw,#rm{flex:1}.panel{position:relative}.hd{display:flex;justify-content:space-between;align-items:center}#gear{font-size:20px;line-height:1;padding:4px 10px}#gear.on{background:var(--acc);color:#fff;border-color:var(--acc)}#set{position:absolute;left:10px;right:10px;top:52px;max-height:calc(100% - 62px);overflow-y:auto;z-index:8;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 12px 32px rgba(0,0,0,.4);display:none;flex-direction:column;gap:8px}#set.open{display:flex}#set small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}.sh{font:600 16px Georgia,serif}.sl{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}input[type=range]{padding:0;border:0;background:none;text-transform:none;accent-color:var(--acc)}#anv{font-size:12px;color:var(--muted);text-align:center}
+#mv .n{color:var(--muted)}#rs,#dw,#rm{flex:1}.panel{position:relative}.hd{display:flex;justify-content:space-between;align-items:center}#lrn{font-size:18px;line-height:1;padding:5px 9px;margin-right:6px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--text);text-decoration:none;display:inline-block;vertical-align:top}#lrn:hover{border-color:var(--acc)}.hb{display:flex;align-items:center}#gear{font-size:20px;line-height:1;padding:4px 10px}#gear.on{background:var(--acc);color:#fff;border-color:var(--acc)}#set{position:absolute;left:10px;right:10px;top:52px;max-height:calc(100% - 62px);overflow-y:auto;z-index:8;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 12px 32px rgba(0,0,0,.4);display:none;flex-direction:column;gap:8px}#set.open{display:flex}#set small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}.sh{font:600 16px Georgia,serif}.sl{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}input[type=range]{padding:0;border:0;background:none;text-transform:none;accent-color:var(--acc)}#anv{font-size:12px;color:var(--muted);text-align:center}
 #promo{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9}
 #promo div{background:var(--panel);padding:16px;border-radius:12px;display:flex;gap:8px}
 #promo button{font-size:40px;padding:6px 14px}
@@ -49,7 +49,7 @@ select{flex:1}.cp{min-height:26px;font-size:20px;letter-spacing:1px;color:var(--
 <div class="app">
 <div class="left"><div id="board"></div><div id="ov"><div class="rc"><div class="ic" id="ovi"></div><h2 id="ovt"></h2><p id="ovs"></p><div class="row"><button id="ovc">View board</button><button class="p" id="ovn">Rematch</button></div></div></div><canvas id="cv"></canvas></div>
 <div class="panel">
-<div class="hd"><h1>♞ Ultimate Chess</h1><button id="gear" title="Settings" aria-label="Settings">&#9881;&#xFE0E;</button></div>
+<div class="hd"><h1>♞ Ultimate Chess</h1><span class="hb"><a id="lrn" href="learn.html" target="_blank" rel="noopener" title="Learning lab (opens in a new tab)">&#128214;&#xFE0E;</a><button id="gear" title="Settings" aria-label="Settings">&#9881;&#xFE0E;</button></span></div>
 <div id="set"><div class="sh">Settings</div>
 <small>Game</small><div class="row"><select id="mode"><option value="w">You: White vs AI</option><option value="b">You: Black vs AI</option><option value="2">Two players</option></select><select id="tc"><option value="0">No clock</option><option value="180">3 min</option><option value="300">5 min</option><option value="600">10 min</option></select></div>
 <small>Computer</small><div class="row"><select id="lvl"><option value="1">Easy</option><option value="2">Medium</option><option value="3" selected>Hard</option><option value="4">Master (slow)</option></select><select id="spd"><option value="300">AI: Fast</option><option value="1200" selected>AI: Normal</option><option value="2600">AI: Slow</option></select></div>
@@ -169,7 +169,7 @@ function render(){const bd=$('board'),o=view==='w'?[0,1,2,3,4,5,6,7]:[7,6,5,4,3,
  $('cw').innerHTML=srt(cw);$('cb').innerHTML=srt(cb);
  $('mw').textContent=df>0?'White +'+df:'';$('mb').textContent=df<0?'Black +'+(-df):'';
  let mv='';hist.forEach((e,i)=>{if(i%2===0)mv+=`<span class="n">${i/2+1}.</span>`;mv+=`<span class="m${i+1===L0?' cur':''}" data-ply="${i+1}">${e.s}</span>`});
- $('mv').innerHTML=mv;const cu=$('mv').querySelector('.cur');$('mv').scrollTop=cu?cu.offsetTop-70:1e5;showClk();labels()}
+ $('mv').innerHTML=mv;const cu=$('mv').querySelector('.cur');$('mv').scrollTop=cu?cu.offsetTop-70:1e5;showClk();labels();saveLive()}
 $('board').onclick=e=>{const el=e.target.closest('.sq');if(!el)return;if(rv!==null){rv=null;render();return}if(over||thinking)return;
  if(mode!=='2p'&&S.t!==human)return;const i=+el.dataset.i;hint=null;
  const mvs=targets.filter(m=>m.t===i);
@@ -247,6 +247,7 @@ function frame(){cx.clearRect(0,0,cv.width,cv.height);
 function showRes(w,txt){$('ovi').textContent=w==='d'?'🤝':'🏆';$('ovt').textContent=w==='d'?'Draw':(w==='w'?'White':'Black')+' won!';$('ovs').textContent=txt;$('ov').style.display='flex';if(w!=='d')pop()}
 function hideRes(){$('ov').style.display='none';parts=[];if(cx)cx.clearRect(0,0,cv.width,cv.height)}
 $('ovc').onclick=hideRes;$('ovn').onclick=()=>{hideRes();$('rm').onclick()};
+function saveLive(){try{localStorage.setItem('chess_live',JSON.stringify({m:hist.map(h=>enc(h.m))}))}catch(e){}}
 const T=[1600,1200,900,700,550,420,300,200,100,0],D=()=>T[+$('ans').value-1];
 function anLabel(){const v=+$('ans').value;$('anv').textContent=T[v-1]?'Piece move time: '+T[v-1]+' ms':'Instant (no sliding)';$('an').value=['3','5','7','10'].includes(String(v))?String(v):'c'}
 $('an').onchange=()=>{if($('an').value!=='c'){$('ans').value=$('an').value;anLabel()}};$('ans').oninput=anLabel;anLabel();
