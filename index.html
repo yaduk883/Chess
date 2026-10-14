@@ -14,7 +14,7 @@ h1{font:600 20px Georgia,serif;margin:0 0 4px;letter-spacing:.5px}
 @media(min-width:900px){.app{--bs:min(560px,calc(100vw - 420px));flex-wrap:nowrap}.panel{height:var(--bs)}}
 .left{flex:none;position:relative}#cv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}#ov{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);border-radius:6px;z-index:5;animation:fade .3s}.rc{background:var(--panel);color:var(--text);padding:22px 30px;border-radius:16px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.45);animation:zoom .5s cubic-bezier(.2,1.5,.4,1)}.rc .ic{font-size:46px;line-height:1.1}.rc h2{font:700 30px Georgia,serif;margin:4px 0}.rc p{margin:0 0 14px;color:var(--muted)}.rc .row{justify-content:center}@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes zoom{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 #board{width:var(--bs);height:var(--bs);display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));border-radius:6px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.28);user-select:none}
-.sq{min-width:0;min-height:0;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sq{min-width:0;min-height:0;overflow:visible;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .l{background:var(--l)}.d{background:var(--d)}
 .last{box-shadow:inset 0 0 0 100px rgba(255,235,59,.38)}.sel{box-shadow:inset 0 0 0 100px rgba(60,200,120,.5)}
 .hint{box-shadow:inset 0 0 0 100px rgba(80,140,255,.5)}
@@ -33,7 +33,7 @@ button:hover{border-color:var(--acc)}button.p{background:var(--acc);color:#fff;b
 select{flex:1}.cp{min-height:26px;font-size:20px;letter-spacing:1px;color:var(--text);display:flex;justify-content:space-between}
 .cp small{font-size:12px;color:var(--muted);align-self:center}.rt{display:flex;gap:8px;align-items:center}.ck{font:600 15px ui-monospace,Menlo,Consolas,monospace;padding:2px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line);min-width:58px;text-align:center}.ck:empty{display:none}.ck.on{background:var(--acc);color:#fff;border-color:var(--acc)}.ck.low{background:#c0392b;color:#fff;border-color:#c0392b}
 #mv{flex:1;min-height:90px;position:relative;overflow-y:auto;border:1px solid var(--line);border-radius:7px;padding:6px 8px;display:grid;grid-template-columns:28px 1fr 1fr;gap:2px 4px;align-content:start;font-variant-numeric:tabular-nums;font-size:14px}#mv .m{cursor:pointer;padding:1px 5px;border-radius:4px}#mv .m:hover{background:var(--line)}#mv .cur{background:var(--acc);color:#fff}.nav button{flex:1;font-size:16px;padding:4px}
-#mv .n{color:var(--muted)}#rs,#dw,#rm{flex:1}
+#mv .n{color:var(--muted)}#rs,#dw,#rm{flex:1}.panel{position:relative}.hd{display:flex;justify-content:space-between;align-items:center}#gear{font-size:20px;line-height:1;padding:4px 10px}#gear.on{background:var(--acc);color:#fff;border-color:var(--acc)}#set{position:absolute;left:10px;right:10px;top:52px;max-height:calc(100% - 62px);overflow-y:auto;z-index:8;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 12px 32px rgba(0,0,0,.4);display:none;flex-direction:column;gap:8px}#set.open{display:flex}#set small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}.sh{font:600 16px Georgia,serif}.sl{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}input[type=range]{padding:0;border:0;background:none;text-transform:none;accent-color:var(--acc)}#anv{font-size:12px;color:var(--muted);text-align:center}
 #promo{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9}
 #promo div{background:var(--panel);padding:16px;border-radius:12px;display:flex;gap:8px}
 #promo button{font-size:40px;padding:6px 14px}
@@ -49,15 +49,18 @@ select{flex:1}.cp{min-height:26px;font-size:20px;letter-spacing:1px;color:var(--
 <div class="app">
 <div class="left"><div id="board"></div><div id="ov"><div class="rc"><div class="ic" id="ovi"></div><h2 id="ovt"></h2><p id="ovs"></p><div class="row"><button id="ovc">View board</button><button class="p" id="ovn">Rematch</button></div></div></div><canvas id="cv"></canvas></div>
 <div class="panel">
-<h1>♞ Ultimate Chess</h1>
+<div class="hd"><h1>♞ Ultimate Chess</h1><button id="gear" title="Settings" aria-label="Settings">&#9881;&#xFE0E;</button></div>
+<div id="set"><div class="sh">Settings</div>
+<small>Game</small><div class="row"><select id="mode"><option value="w">You: White vs AI</option><option value="b">You: Black vs AI</option><option value="2">Two players</option></select><select id="tc"><option value="0">No clock</option><option value="180">3 min</option><option value="300">5 min</option><option value="600">10 min</option></select></div>
+<small>Computer</small><div class="row"><select id="lvl"><option value="1">Easy</option><option value="2">Medium</option><option value="3" selected>Hard</option><option value="4">Master (slow)</option></select><select id="spd"><option value="300">AI: Fast</option><option value="1200" selected>AI: Normal</option><option value="2600">AI: Slow</option></select></div>
+<small>Piece movement</small><div class="row"><select id="an"><option value="3">Move: Slow</option><option value="5" selected>Move: Normal</option><option value="7">Move: Fast</option><option value="10">Move: Instant</option><option value="c">Move: Custom</option></select></div>
+<div class="sl"><span>Slow</span><input type="range" id="ans" min="1" max="10" step="1" value="5"><span>Fast</span></div><div id="anv"></div>
+<small>Appearance</small><div class="row"><select id="bt"></select><select id="pt"></select></div></div>
 <div id="st"></div>
 <div class="cp"><span id="cb"></span><span class="rt"><small id="mb"></small><b class="ck" id="kb"></b></span></div>
 <div class="cp"><span id="cw"></span><span class="rt"><small id="mw"></small><b class="ck" id="kw"></b></span></div>
 <div id="mv"></div>
 <div class="row nav"><button id="f0" title="Start">&laquo;</button><button id="f1" title="Back (left arrow)">&lsaquo;</button><button id="f2" title="Forward (right arrow)">&rsaquo;</button><button id="f3" title="Back to live game">&raquo;</button></div>
-<div class="row"><select id="mode"><option value="w">You: White vs AI</option><option value="b">You: Black vs AI</option><option value="2">Two players</option></select><select id="tc"><option value="0">No clock</option><option value="180">3 min</option><option value="300">5 min</option><option value="600">10 min</option></select></div>
-<div class="row"><select id="lvl"><option value="1">Easy</option><option value="2">Medium</option><option value="3" selected>Hard</option><option value="4">Master (slow)</option></select><select id="spd"><option value="300">AI: Fast</option><option value="1200" selected>AI: Normal</option><option value="2600">AI: Slow</option></select></div>
-<div class="row"><select id="bt"></select><select id="pt"></select></div>
 <div class="row"><button class="p" id="new">New</button><button id="undo">Undo</button><button id="hintb">Hint</button><button id="flip">Flip</button></div>
 <div class="row"><button id="rs">Resign</button><button id="dw">Draw</button><button id="rm">Rematch</button></div>
 <div class="row" id="onl"><button id="mk">Play online</button><input id="cd" placeholder="Game code" maxlength="6"><button id="jn">Join</button></div>
@@ -140,10 +143,10 @@ function newGame(online){const st='rnbqkbnr'+'pppppppp'+' '.repeat(32)+'PPPPPPPP
 function doMove(m,rm){const L=legal(S),sn=san(m,L),u=make(S,m),w=S.t==='w';
  const nl=legal(S);let suf='';if(inCheck(S,w))suf=nl.length?'+':'#';
  if(tcSec&&mode!=='on'){const now=Date.now(),mv=S.t==='w'?'b':'w';if(clk.run)clk[mv]-=now-clk.last;clk.last=now;clk.run=true}
- hist.push({m,u,s:sn+suf});snaps.push(S.b.slice());keys.push(key(S));sel=null;targets=[];hint=null;render();aiMove();
+ hist.push({m,u,s:sn+suf});snaps.push(S.b.slice());keys.push(key(S));sel=null;targets=[];hint=null;render();if(rv===null&&!noAnim)animMove(m,u.cap);aiMove();
  if(mode==='on'&&!rm&&ws&&ws.readyState===1)ws.send(JSON.stringify({t:'move',mv:enc(m)}))}
 function aiMove(){if(over||mode!=='ai'||S.t===human)return;thinking=true;$('st').textContent='Thinking…';const t=++token;
- const t0=Date.now(),wait=+$('spd').value;
+ const t0=Date.now(),wait=+$('spd').value+D();
  think(S,+$('lvl').value,m=>{if(t!==token)return;const rest=Math.max(0,wait*(.8+Math.random()*.5)-(Date.now()-t0));setTimeout(()=>{if(t!==token)return;thinking=false;if(m)doMove(m)},rest)})}
 function insuf(){const ps=S.b.filter(p=>p&&p.toLowerCase()!=='k');return ps.length===0||(ps.length===1&&/[bn]/i.test(ps[0]))}
 function status(){win=null;if(flag){over=true;win=flag==='w'?'b':'w';if(!thinking)$('st').textContent='Time out - '+(flag==='w'?'Black':'White')+' wins on time';return false}if(endMsg){over=true;win=/White wins/.test(endMsg)?'w':/Black wins/.test(endMsg)?'b':'d';if(!thinking)$('st').textContent=endMsg;return false}const L=legal(S),w=S.t==='w',c=inCheck(S,w);over=true;let m;
@@ -186,13 +189,13 @@ $('hintb').onclick=()=>{if(over||thinking||mode==='on')return;thinking=true;$('s
  think(S,3,m=>{thinking=false;hint=m;sel=null;targets=[];render()})};
 const SERVER='wss://chess-db.onrender.com';
 const tok=(()=>{try{let k=localStorage.getItem('cht');if(!k){k=Math.random().toString(36).slice(2,10);localStorage.setItem('cht',k)}return k}catch(e){return Math.random().toString(36).slice(2,10)}})();
-let ws=null,gcode='',viewSet=0,ngen=-1,offerBy=null,rmBy=null,endMsg=null,win=null,resShown=0,keys=[],tcSec=0,netTc=0,flag=null,clk={w:0,b:0,last:0,run:false};
+let ws=null,gcode='',viewSet=0,ngen=-1,offerBy=null,rmBy=null,endMsg=null,noAnim=false,win=null,resShown=0,keys=[],tcSec=0,netTc=0,flag=null,clk={w:0,b:0,last:0,run:false};
 const enc=m=>m.f+'-'+m.t+(m.p?'-'+m.p:'');
 function leaveNet(){if(ws){ws.onclose=null;ws.close();ws=null}gcode='';$('net').textContent=''}
 function sync(ms){const mine=hist.map(h=>enc(h.m));let i=0;
  while(i<mine.length&&i<ms.length&&mine[i]===ms[i])i++;
  if(i<mine.length&&i<ms.length){newGame(true);i=0}
- for(;i<ms.length;i++){const[f,t,p]=ms[i].split('-'),m=legal(S).find(x=>x.f==f&&x.t==t&&(x.p||'')===(p||''));if(!m)break;doMove(m,1)}}
+ for(;i<ms.length;i++){const[f,t,p]=ms[i].split('-'),m=legal(S).find(x=>x.f==f&&x.t==t&&(x.p||'')===(p||''));if(!m)break;noAnim=i<ms.length-1;doMove(m,1)}noAnim=false}
 function goOnline(code,create){
  if(SERVER.includes('YOUR-SERVER')){$('net').textContent='Set the SERVER url in chess.html first (see README)';return}
  leaveNet();$('net').textContent='Connecting... (free servers can take up to a minute to wake)';
@@ -244,7 +247,19 @@ function frame(){cx.clearRect(0,0,cv.width,cv.height);
 function showRes(w,txt){$('ovi').textContent=w==='d'?'🤝':'🏆';$('ovt').textContent=w==='d'?'Draw':(w==='w'?'White':'Black')+' won!';$('ovs').textContent=txt;$('ov').style.display='flex';if(w!=='d')pop()}
 function hideRes(){$('ov').style.display='none';parts=[];if(cx)cx.clearRect(0,0,cv.width,cv.height)}
 $('ovc').onclick=hideRes;$('ovn').onclick=()=>{hideRes();$('rm').onclick()};
-const go=n=>{n=Math.max(0,Math.min(hist.length,n));rv=n===hist.length?null:n;sel=null;targets=[];render()},cur=()=>rv===null?hist.length:rv;
+const T=[1600,1200,900,700,550,420,300,200,100,0],D=()=>T[+$('ans').value-1];
+function anLabel(){const v=+$('ans').value;$('anv').textContent=T[v-1]?'Piece move time: '+T[v-1]+' ms':'Instant (no sliding)';$('an').value=['3','5','7','10'].includes(String(v))?String(v):'c'}
+$('an').onchange=()=>{if($('an').value!=='c'){$('ans').value=$('an').value;anLabel()}};$('ans').oninput=anLabel;anLabel();
+$('gear').onclick=e=>{e.stopPropagation();$('set').classList.toggle('open');$('gear').classList.toggle('on')};
+document.addEventListener('click',e=>{if(!e.target.closest('#set')&&!e.target.closest('#gear')){$('set').classList.remove('open');$('gear').classList.remove('on')}});
+function slide(f,t,cap,cs){const d=D();if(!d||!document.body.animate)return;
+ const sf=document.querySelector(`.sq[data-i="${f}"]`),st=document.querySelector(`.sq[data-i="${t}"]`),pc=st&&st.querySelector('.pc');if(!sf||!pc)return;
+ const a=sf.getBoundingClientRect(),b=st.getBoundingClientRect();pc.style.zIndex=5;
+ pc.animate([{transform:`translate(${a.left-b.left}px,${a.top-b.top}px) scale(1.12)`},{transform:'translate(0,0) scale(1)'}],{duration:d,easing:'cubic-bezier(.45,.05,.25,1)'}).onfinish=()=>{pc.style.zIndex=''};
+ if(cap){const sc=document.querySelector(`.sq[data-i="${cs}"]`);if(sc){const g=document.createElement('div');g.innerHTML=ic(cap);const el=g.firstChild;el.style.cssText='position:absolute;z-index:2';sc.appendChild(el);
+  el.animate([{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.5)'}],{duration:d,easing:'ease-in',fill:'forwards'}).onfinish=()=>el.remove()}}}
+function animMove(m,cap){slide(m.f,m.t,cap,m.ep?(m.f&~7)|(m.t&7):m.t);if(m.cas){const a=m.t>m.f;slide(a?m.f+3:m.f-4,a?m.f+1:m.f-1)}}
+const go=n=>{const was=cur();n=Math.max(0,Math.min(hist.length,n));rv=n===hist.length?null:n;sel=null;targets=[];render();if(n===was+1)animMove(hist[n-1].m,hist[n-1].u.cap)},cur=()=>rv===null?hist.length:rv;
 $('f0').onclick=()=>go(0);$('f1').onclick=()=>go(cur()-1);$('f2').onclick=()=>go(cur()+1);$('f3').onclick=()=>go(hist.length);
 $('mv').onclick=e=>{const s=e.target.closest('[data-ply]');if(s)go(+s.dataset.ply)};
 addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){go(cur()-1);e.preventDefault()}else if(e.key==='ArrowRight'){go(cur()+1);e.preventDefault()}});
